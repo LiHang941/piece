@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<!--游戏css-->
+<link href="style/style.css" rel="stylesheet">
+<style>
+    .head{
+        text-align: center;
+    }
+    .game{
+        margin: 0 auto;
+        margin-top: 50px;
+        background-image: url("images/background.jpg") ;
+        z-index:1;
+        margin-bottom: 100px;
+        padding-left: 100px;
+        padding-top:50px ;
+    }
+</style>
+<body>
+    <h5 class="head">五子棋</h5>
+    <hr/>
+    <div id="game" class="game">
+    </div>
+</body>
+<script src="js/core.js"></script>
+<script src="js/ai.js"></script>
+<script>
+    aICallBack  = function () {
+        var $data = pieceAI.start($GAME_DATA_All);
+        console.log($data);
+        var id = "piece_x_" + $data.x + "_y_" + $data.y;
+        pieceClick(document.getElementById(id));
+    }
+    var $element = document.getElementById("game");
+    gameStart($element);
+</script>
+</html>

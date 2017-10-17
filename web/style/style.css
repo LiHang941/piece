@@ -1,0 +1,26 @@
+.line{
+    float: left;
+    width: 100%;
+}
+.horizontal{
+    float: left;
+    position: relative;
+}
+.piece {
+    position: relative;
+    border-radius: 50%;
+    z-index: 3;
+}
+.piece-click {
+    opacity: 1;
+}
+.sun{
+    opacity: 0;
+}
+/* click棋子后  */
+/* hover css 应该失效  可通过替换class 实现 */
+/* 棋子在上方浮现  透明度0.5 */
+.sun:hover{
+    background-color: gray;
+    opacity: 0.5;
+}
