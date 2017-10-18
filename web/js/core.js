@@ -1,11 +1,9 @@
 
 
 
-/**
- *   ##游戏规则
- *   ##界面
- */
-
+//=============================
+// 游戏配置
+//=============================
 
 /**
  * 基础配置
@@ -13,30 +11,53 @@
 var GAME_CONFIG = {
     //界面配置
     window:{
-        width:600,
-        height:600,
-        line_color:"blue", //线条颜色
+        width:400,
+        height:400,
+        line_color:"#2F4056", //线条颜色
         line_width:1, // 棋子线条宽度px
-        box_height:40,  //棋子高度px
-        box_width:40,   //棋子宽度px
+        box_height:20,  //棋子高度px
+        box_width:20,   //棋子宽度px
         piece_white_color:"#FFFFFF",
         piece_black_color:"#000000",
     },
+    game:{
+        TheUpperHand : true,  //先手是谁  true 玩家  false 电脑
+        $lineCount:0,
+        $columnCount:0,
+        $elementIdName:"",
+        rank:0,  //机器人等级
+    }
 };
+
+//================================
+// 下棋核心方法
+//================================
+
+
+/**
+ * core.js核心对象
+ * @type {{}}
+ */
+var piece = {};
 
 /**
  * 机器人回调
  * @type {null}
  */
-var aICallBack = null;
+piece.aICallBack = null;
 
 
 /**
  * 游戏中的数据  存放  0 空位 1 白棋 2黑棋
  * @type {array[i][j]}
  */
-var $GAME_DATA_All ;
+piece.$GAME_DATA_All ;
 
+/**
+ * 下棋的历史记录
+ * @type {Array}
+ */
+piece.$PieceHistory = [];
 
 /**
  * 游戏开始构造
@@ -44,43 +65,90 @@ var $GAME_DATA_All ;
  * @param i
  * @param j
  */
-function gameStart(element) {
-    var $lineCount = (GAME_CONFIG.window.width + 100) / (GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width);
-    var $columnCount = (GAME_CONFIG.window.height+ 100) / (GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width);
+piece.gameStart = function ($elementIdName) {
+    var element = document.getElementById($elementIdName);
+    var $lineCount = (GAME_CONFIG.window.width ) / (GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width);
+    var $columnCount = (GAME_CONFIG.window.height) / (GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width);
     $lineCount = parseInt($lineCount);
     $columnCount = parseInt($columnCount);
-    $element.style.width = (((GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width) * $lineCount) +50)  + "px";
-    $element.style.height = (((GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width) * $lineCount) + 50) +"px";
-    bannerWrite();
-    var xArray = new Array($lineCount);
-    for(var x=0;x<$lineCount;x++){
-        xArray[x]=new Array($columnCount);
-        for(var y=0;y<$columnCount;y++){
+    element.style.width = (((GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width) * $lineCount) + 50)  + "px";
+    element.style.height = (((GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width) * $lineCount) + 50) +"px";
+    element.style.left = (50) + "px";
+    element.style.top = (50) + "px";
+    GAME_CONFIG.game.$lineCount = $lineCount;
+    GAME_CONFIG.game.$columnCount = $columnCount;
+    GAME_CONFIG.game.$elementIdName = $elementIdName;
+    piece.bannerWrite();
+}
+
+
+
+/**
+ * 游戏重新开始
+ * @param element
+ * @param $lineCount
+ * @param $columnCount
+ */
+piece.gameRestart = function (theUpperHandFlag) {
+    //初始化数据
+    piece.$PieceHistory = [];
+    piece.gameOverFlag = false;
+    piece.onTheOffensiveFlag = false;
+    var xArray = new Array(GAME_CONFIG.game.$lineCount);
+    for(var x=0;x<GAME_CONFIG.game.$lineCount;x++){
+        xArray[x]=new Array(GAME_CONFIG.game.$columnCount);
+        for(var y=0;y<GAME_CONFIG.game.$columnCount;y++){
             xArray[x][y]=0;
         }
     }
-
-    $GAME_DATA_All = xArray;
-    gameInterface(element,$lineCount,$columnCount);
+    piece.$GAME_DATA_All = xArray;
+    var element = document.getElementById(GAME_CONFIG.game.$elementIdName);
+    piece.gameInterface(element);
+    GAME_CONFIG.game.TheUpperHand = theUpperHandFlag;
+    // 判断是谁先手
+    if(GAME_CONFIG.game.TheUpperHand == false){
+        piece.pieceClick(parseInt(GAME_CONFIG.game.$lineCount / 2),parseInt(GAME_CONFIG.game.$columnCount / 2));
+    }
+}
+/**
+ * 棋子撤回
+ */
+piece.withdraw = function () {
+    if(piece.$PieceHistory.length > 1){
+        var data = piece.$PieceHistory.pop();
+        //是电脑下的
+        if(data.value == GAME_CONFIG.game.TheUpperHand){
+            piece.$GAME_DATA_All[data.x][data.y] = 0;
+            //恢复界面
+            document.getElementById("piece_x_" + data.x + "_y_" + data.y).setAttribute("class","piece sun");
+            data = piece.$PieceHistory.pop();
+            piece.$GAME_DATA_All[data.x][data.y] = 0;
+            document.getElementById("piece_x_" + data.x + "_y_" + data.y).setAttribute("class","piece sun");
+        }
+        //判断玩家是哪种棋子
+        piece.gameOverFlag = false;
+    }else{
+        alert("没有能撤回的历史");
+    }
 }
 
 /**
  * 游戏结束标记
  * @type {boolean}
  */
-var gameOverFlag = false;
+piece.gameOverFlag = false;
 
 /**
  * 下棋标记
  * @type {setTime}
  */
-var playChessFlag ;
+piece.playChessFlag ;
 
 /**
  * 该谁下棋   - true 白棋   -false 黑棋   默认黑棋先手
  * @type {boolean}
  */
-var onTheOffensiveFlag = false;
+piece.onTheOffensiveFlag = false;
 
 
 
@@ -88,49 +156,51 @@ var onTheOffensiveFlag = false;
  * 下棋事件
  * @param dom click dom 对象
  */
-function pieceClickEven(dom) {
-    if(playChessFlag)
-        clearTimeout(playChessFlag);
-    playChessFlag = setTimeout(pieceClick(dom),500);
+piece.pieceClickEven = function (dom) {
+    var x = dom.getAttribute("x");
+    var y = dom.getAttribute("y");
+    if(piece.playChessFlag)
+        clearTimeout(piece.playChessFlag);
+    piece.playChessFlag = setTimeout(piece.pieceClick(x,y),500);
 }
 
 /**
  * 下棋核心
  * @param dom
  */
-function pieceClick(dom) {
-    if(gameOverFlag){
+piece.pieceClick = function(x,y) {
+    var dom  = document.getElementById("piece_x_" + x + "_y_" + y);
+    if(piece.gameOverFlag){
         return; //游戏是否结束
     }
     if(dom.getAttribute("class").indexOf("piece-click") != -1){
         return;
     }
     dom.setAttribute("class","piece piece-click");
-    var x = dom.getAttribute("x");
-    var y = dom.getAttribute("y");
-    var $value = onTheOffensiveFlag? 1:2;
-    $GAME_DATA_All[x][y] = $value;
-    if(onTheOffensiveFlag){
+    var $value = piece.onTheOffensiveFlag? 1:2;
+    piece.$GAME_DATA_All[x][y] = $value;
+    piece.$PieceHistory.push({'x':x,'y':y,'value':piece.onTheOffensiveFlag == true});
+    if(piece.onTheOffensiveFlag){
         dom.style.backgroundColor = GAME_CONFIG.window.piece_white_color;
     }else{
         dom.style.backgroundColor = GAME_CONFIG.window.piece_black_color;
     }
-    isGameOver(x,y,$value);
-    onTheOffensiveFlag = !onTheOffensiveFlag;
+    piece.isGameOver(x,y,$value);
+    piece.onTheOffensiveFlag = !piece.onTheOffensiveFlag;
 
     //AI开始
-    if (aICallBack != null && onTheOffensiveFlag==true){
-        aICallBack();
+    if (piece.aICallBack != null && piece.onTheOffensiveFlag==GAME_CONFIG.game.TheUpperHand){
+        piece.aICallBack();
     }
 }
 
 /**
  * 判断游戏是否结束
  */
-function isGameOver(x,y,$value) {
+piece.isGameOver = function (x,y,$value) {
     x = parseInt(x);
     y = parseInt(y);
-    var tempArray = $GAME_DATA_All;
+    var tempArray = piece.$GAME_DATA_All;
     var $x_min = (x-5<0 ? 0 :(x - 5 ));
     var $x_max = (x+5 > tempArray.length ? tempArray.length : (x + 5));
 
@@ -156,7 +226,7 @@ function isGameOver(x,y,$value) {
                 count.push($data);
             }
             if(count.length == 5){
-                gameOver(x,y,count);
+                piece.gameOver(x,y,count);
                 return;
             }
         }
@@ -182,7 +252,7 @@ function isGameOver(x,y,$value) {
                 count.push($data);
             }
             if(count.length == 5){
-                gameOver(x,y,count);
+                piece.gameOver(x,y,count);
                 return;
             }
         }
@@ -203,7 +273,7 @@ function isGameOver(x,y,$value) {
                 $data.y = lowerRightY;
                 lowerRightCount.push($data);
                 if(lowerRightCount.length == 5){
-                    gameOver(x,y,lowerRightCount);
+                    piece.gameOver(x,y,lowerRightCount);
                     return;
                 }
             }else {
@@ -215,7 +285,7 @@ function isGameOver(x,y,$value) {
                 $data.y = onTheTightY;
                 onTheTightCount.push($data);
                 if(onTheTightCount.length == 5){
-                    gameOver(x,y,onTheTightCount);
+                    piece.gameOver(x,y,onTheTightCount);
                     return;
                 }
             }else {
@@ -231,11 +301,11 @@ function isGameOver(x,y,$value) {
  * @param y
  * @param array 五子连珠的数组
  */
-function gameOver(x , y , array) {
-    gameOverFlag = true;
-    var color = onTheOffensiveFlag ? GAME_CONFIG.window.piece_white_color :GAME_CONFIG.window.piece_black_color;
-    pieceTwinkle(array,true,color);
-    var str = onTheOffensiveFlag ? "白棋" : "黑棋";
+piece.gameOver=function (x , y , array) {
+    piece.gameOverFlag = true;
+    var color = piece.onTheOffensiveFlag ? GAME_CONFIG.window.piece_white_color :GAME_CONFIG.window.piece_black_color;
+    piece.pieceTwinkle(array,true,color);
+    var str = piece.onTheOffensiveFlag ? "白棋" : "黑棋";
     alert(str + "赢了");
 }
 
@@ -245,7 +315,10 @@ function gameOver(x , y , array) {
  * @param flag
  * @param color
  */
-function pieceTwinkle(array,flag,color) {
+piece.pieceTwinkle=function (array,flag,color,index) {
+    if(index == null){
+        index = 0;
+    }
     setTimeout(function () {
         for(var i=0;i<array.length;i++){
             var $data = array[i];
@@ -255,7 +328,9 @@ function pieceTwinkle(array,flag,color) {
                 document.getElementById("piece_x_" + $data.x + "_y_" + $data.y).style.backgroundColor = color;
             }
         }
-        pieceTwinkle(array,!flag,color);
+        if(index < 3){
+            piece.pieceTwinkle(array,!flag,color,++index);
+        }
     },500);
 }
 
@@ -266,7 +341,9 @@ function pieceTwinkle(array,flag,color) {
  * @param i  行数目
  * @param j  列数目
  */
-function gameInterface(element,i,j) {
+piece.gameInterface = function (element) {
+    var i = GAME_CONFIG.game.$lineCount;
+    var j = GAME_CONFIG.game.$columnCount;
     //生成
     var $html = '';
     for(var x = 0 ;x<i;x++){
@@ -282,21 +359,18 @@ function gameInterface(element,i,j) {
             if(x < i-1){
                 style = style + "border-left: " +GAME_CONFIG.window.line_width + "px solid " + GAME_CONFIG.window.line_color+ ";";
             }else{
-                //style = style + "padding-left:" +(GAME_CONFIG.window.line_width )  + "px;";
                 style = style + "width:" +(GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width )  + "px;";
             }
-
             if(y == 0 && x == i-1){
                 style = style + "padding-left:" +(GAME_CONFIG.window.line_width )  + "px;";
             }
-
             var $qiziStyle = "left:-" + (GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width) /2 +"px;" +
                 " top:-"+ (GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width) /2+"px;" +
                 " width: "+(GAME_CONFIG.window.box_width)+"px;" +
                 " height: "+(GAME_CONFIG.window.box_height)+"px;";
             $html = $html +
                 '<div class="horizontal" id="horizontal_x_'+ x +'_y_'+y+'" style="'+style+'">' +
-                '<div id="piece_x_'+ x +'_y_'+y+'" class="piece sun" style="'+$qiziStyle+'" x="'+x+'" y="'+y+'" onclick="pieceClickEven(this)">' +
+                '<div id="piece_x_'+ x +'_y_'+y+'" class="piece sun" style="'+$qiziStyle+'" x="'+x+'" y="'+y+'" onclick="piece.pieceClickEven(this)">' +
                 '</div>' +
                 '</div>';
         }
@@ -305,11 +379,17 @@ function gameInterface(element,i,j) {
     element.innerHTML = $html;
 }
 
+/**
+ *  设置页面
+ */
+piece.setting = function () {
+
+}
 
 /**
  * banner 推广 输出
  */
-function bannerWrite() {
+piece.bannerWrite = function () {
     console.log("  _       _  _    _                       ____   _");
     console.log(" | |     (_)| |  | |                     |  _ \\ | |");
     console.log(" | |      _ | |__| |  __ _  _ __    __ _ | |_) || |      ___    __ _");

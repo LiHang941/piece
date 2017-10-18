@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>五子棋</title>
 </head>
 <!--游戏css-->
 <link href="style/style.css" rel="stylesheet">
@@ -10,32 +10,118 @@
     .head{
         text-align: center;
     }
-    .game{
+    .centent{
+        width: 800px;
+        height: auto;
         margin: 0 auto;
-        margin-top: 50px;
-        background-image: url("images/background.jpg") ;
-        z-index:1;
-        margin-bottom: 100px;
-        padding-left: 100px;
-        padding-top:50px ;
     }
+    .gameBackground{
+        border-radius: 18px;
+        min-width: 568px;
+        min-height: 568px;
+        background-image: url("images/background.jpg") ;
+        position:relative;
+        float: left;
+    }
+    .game{
+        z-index:1;
+        margin: auto;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+    }
+    .muens {
+        float: left;
+        margin-left: 5px;
+        width: 200px;
+        height: 300px;
+        background-color: #c2c2c2;
+        border-radius: 18px;
+    }
+    .muens ul{
+        width: 150px;
+        height: auto;
+        margin: 0 auto;
+        margin-top: 30px;
+    }
+    .muens li{
+        list-style-type:none;
+        margin-bottom: 8px;
+        background-color: #1E9FFF;
+        color: azure;
+        width: 100px;
+        line-height: 40px;
+        height: 40px;
+        border-radius: 18px;
+        text-align: center;
+    }
+    .muens li:hover{
+        background-color: #FF5722;
+    }
+
+    .setting{
+        position: absolute;
+        top:0px;
+        left: 1%;
+        width: 98%;
+        height: 100%;
+        background-color: #d2d2d2;
+        opacity:0.8;
+        z-index:5;
+        /*display: block;*/
+        display: none;
+
+    }
+    .setting ul{
+        width: 200px;
+        margin: 0 auto;
+        margin-top: 100px;
+    }
+    .setting li {
+        list-style-type:none;
+        height: 80px;
+        background-color: red;
+        margin-bottom: 10px;
+    }
+
 </style>
-<body>
-    <h5 class="head">五子棋</h5>
+<body style="min-width: 800px;height: auto;">
+    <h4 class="head">五子棋</h4> <h5 class="head" style="color: red">(请使用chrome或者IE版本>=10 的浏览器)</h5>
     <hr/>
-    <div id="game" class="game">
+    <div class="centent">
+        <div class="gameBackground">
+            <div id="game" class="game">
+            </div>
+        </div>
+        <!--右侧菜单栏-->
+        <div class="muens">
+            <div style="text-align: center;color: #2F4056;font-size: 18px;margin-top: 15px;font-weight:bold">游戏菜单</div>
+            <ul>
+                <li onclick="piece.gameRestart(true)">玩家先行</li>
+                <li onclick="piece.gameRestart(false)">电脑先行</li>
+                <li onclick="piece.withdraw()">撤回</li>
+                <!--<li>配置</li>-->
+            </ul>
+        </div>
     </div>
+    <div class="setting">
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+
+
 </body>
 <script src="js/core.js"></script>
 <script src="js/ai.js"></script>
 <script>
-    aICallBack  = function () {
-        var $data = pieceAI.start($GAME_DATA_All);
+    //AI回调
+    piece.aICallBack  = function () {
+        var $data = pieceAI.start(piece.$GAME_DATA_All);
         console.log($data);
-        var id = "piece_x_" + $data.x + "_y_" + $data.y;
-        pieceClick(document.getElementById(id));
+        piece.pieceClick($data.x,$data.y);
     }
-    var $element = document.getElementById("game");
-    gameStart($element);
+    piece.gameStart("game");
 </script>
 </html>

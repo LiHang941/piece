@@ -99,14 +99,14 @@ pieceAI.parseArraytoScore = function (x,y,array) {
     whriteScoreSum = pieceAI.scoreSumArrPares(whriteScoreSumArr);
 
 
-    if(blockScoreSum > 0) {
-        console.log("blockScoreData:" + JSON.stringify(array) + "##" + blockScoreSumStr);
-        console.log("-----------" + x + "-----------" + y + "------------------------------");
-    }
-    if(whriteScoreSum > 0) {
-        console.log("whriteScoreData:" + JSON.stringify(array) + "##" + whriteScoreSumStr);
-        console.log("-----------" + x + "-----------" + y + "------------------------------");
-    }
+    // if(blockScoreSum > 0) {
+    //     console.log("blockScoreData:" + JSON.stringify(array) + "##" + blockScoreSumStr);
+    //     console.log("-----------" + x + "-----------" + y + "------------------------------");
+    // }
+    // if(whriteScoreSum > 0) {
+    //     console.log("whriteScoreData:" + JSON.stringify(array) + "##" + whriteScoreSumStr);
+    //     console.log("-----------" + x + "-----------" + y + "------------------------------");
+    // }
     if(pieceAI.blockScoreData.score < blockScoreSum){
         pieceAI.blockScoreData.x = x;
         pieceAI.blockScoreData.y = y;
