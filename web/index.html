@@ -6,122 +6,171 @@
 </head>
 <!--游戏css-->
 <link href="style/style.css" rel="stylesheet">
-<style>
-    .head{
-        text-align: center;
-    }
-    .centent{
-        width: 800px;
-        height: auto;
-        margin: 0 auto;
-    }
-    .gameBackground{
-        border-radius: 18px;
-        min-width: 568px;
-        min-height: 568px;
-        background-image: url("images/background.jpg") ;
-        position:relative;
-        float: left;
-    }
-    .game{
-        z-index:1;
-        margin: auto;
-        position: absolute;
-        top: 0; left: 0; bottom: 0; right: 0;
-    }
-    .muens {
-        float: left;
-        margin-left: 5px;
-        width: 200px;
-        height: 300px;
-        background-color: #c2c2c2;
-        border-radius: 18px;
-    }
-    .muens ul{
-        width: 150px;
-        height: auto;
-        margin: 0 auto;
-        margin-top: 30px;
-    }
-    .muens li{
-        list-style-type:none;
-        margin-bottom: 8px;
-        background-color: #1E9FFF;
-        color: azure;
-        width: 100px;
-        line-height: 40px;
-        height: 40px;
-        border-radius: 18px;
-        text-align: center;
-    }
-    .muens li:hover{
-        background-color: #FF5722;
-    }
-
-    .setting{
-        position: absolute;
-        top:0px;
-        left: 1%;
-        width: 98%;
-        height: 100%;
-        background-color: #d2d2d2;
-        opacity:0.8;
-        z-index:5;
-        /*display: block;*/
-        display: none;
-
-    }
-    .setting ul{
-        width: 200px;
-        margin: 0 auto;
-        margin-top: 100px;
-    }
-    .setting li {
-        list-style-type:none;
-        height: 80px;
-        background-color: red;
-        margin-bottom: 10px;
-    }
-
-</style>
-<body style="min-width: 800px;height: auto;">
-    <h4 class="head">五子棋</h4> <h5 class="head" style="color: red">(请使用chrome或者IE版本>=10 的浏览器)</h5>
+<body>
+    <h1 class="head">五子棋</h1>
     <hr/>
     <div class="centent">
         <div class="gameBackground">
             <div id="game" class="game">
             </div>
         </div>
-        <!--右侧菜单栏-->
-        <div class="muens">
-            <div style="text-align: center;color: #2F4056;font-size: 18px;margin-top: 15px;font-weight:bold">游戏菜单</div>
-            <ul>
-                <li onclick="piece.gameRestart(true)">玩家先行</li>
-                <li onclick="piece.gameRestart(false)">电脑先行</li>
-                <li onclick="piece.withdraw()">撤回</li>
-                <!--<li>配置</li>-->
-            </ul>
-        </div>
-    </div>
-    <div class="setting">
-        <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-        </ul>
     </div>
 
+    <!--右侧菜单栏-->
+    <div class="muens">
+        <div style="text-align: center;color: #2F4056;font-size: 20px;margin-top: 15px;font-weight:bold">游戏菜单</div>
+        <ul>
+            <li style="background-color: #009688" onclick="piece.gameRestart(true)">玩家先行</li>
+            <li style="background-color: #009688" onclick="piece.gameRestart(false)">电脑先行</li>
+            <li style="background-color: #FF5722" onclick="piece.withdraw()">撤回</li>
+            <li style="background-color: #01AAED" onclick="help()">帮助</li>
+            <li style="background-color: #FFFFFF;border: 1px solid #e2e2e2;color: #393D49" onclick="setting()">配置</li>
+        </ul>
+        <div style="text-align: center;color: #393D49;font-size: 20px;margin-top: 15px;font-weight:bold">游戏等级</div>
+        <div style="width: 180px;margin: 0 auto;">
+            <select name="rank" onchange="selectFn(this,true)">
+                <option value="2" >噩梦(向后推7步)</option>
+                <option value="1" >困难(偏进攻)</option>
+                <option value="0" >简单(偏防守)</option>
+            </select>
+        </div>
+        <div style="text-align: center;color: #2F4056;font-size: 20px;margin-top: 15px;font-weight:bold">有无禁手</div>
+        <div style="width: 180px;margin: 0 auto;">
+            <select name="fiveInARow" onchange="selectFn(this,false)">
+                <option value="1" >有</option>
+                <option value="0" >无</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="setting" id="setting">
+        <h1 class="head" style="color: #393D49">游戏配置</h1>
+        <hr/>
+        <table>
+            <tr>
+                <td style="width: 150px"><b>颜色</b><small>(颜色代码)</small></td>
+                <td  style="width: 100px">白棋颜色 </td>
+                <td  style="width: 100px;"><input name="piece_white_color"  value=""/></td>
+                <td  style="width: 100px">黑棋颜色 </td>
+                <td  style="width: 100px"><input name="piece_black_color"  value=""/></td>
+                <td  style="width: 100px">线条颜色 </td>
+                <td  style="width: 100px"><input name="line_color"  value=""/></td>
+            </tr>
+            <tr>
+                <td><b>长宽</b><small>(单位px)</small></td>
+                <td>棋子高度 </td>
+                <td><input name="box_height" value=""/></td>
+                <td>棋子宽度 </td>
+                <td><input name="box_width" value=""/></td>
+                <td>线条宽度 </td>
+                <td><input name="line_width" value=""/></td>
+            </tr>
+        </table>
+        <div style="margin: 0 auto;width: 500px;">
+            <a href="javascript:saveConfig();" >保存</a>
+            <a href="javascript:close();" style="background-color:#FF5722;">关闭</a>
+            <a href="javascript:defaultConfig();" style="background-color:#01AAED;">恢复默认</a>
+        </div>
+    </div>
+    <div class="state">
+        <p id="stateLog">欢迎使用五子棋游戏</p>
+    </div>
+    <hr/>
+
+    <div class="bottom">
+        <P>源码:<a href="https://github.com/wawa2222/piece">https://github.com/wawa2222/piece</a></P>
+        <P>@2017-10-23</P>
+    </div>
 
 </body>
 <script src="js/core.js"></script>
 <script src="js/ai.js"></script>
+<script src="js/common.js"></script>
 <script>
+    document.getElementsByName("rank")[0].value = GAME_CONFIG.game.rank;
+    document.getElementsByName("fiveInARow")[0].value = GAME_CONFIG.game.fiveInARow ? 1: 0;
+    function selectFn(dom,flag) {
+        if(flag == true){
+            GAME_CONFIG.game.rank = parseInt(dom.value);
+        }else{
+            GAME_CONFIG.game.fiveInARow = (dom.value == 1 ? true: false);
+        }
+    }
+    function setting() {
+        for(var item in GAME_CONFIG.window){
+            if(item != "width" && item != "height"){
+                var jValue=GAME_CONFIG.window[item];//key所对应的value
+                document.getElementsByName(item)[0].value = jValue;
+            }
+        }
+        document.getElementById("setting").style.display = "block";
+    }
+    function saveConfig() {
+        for(var item in GAME_CONFIG.window){
+            if(item != "width" && item != "height"){
+                var jvalue = document.getElementsByName(item)[0].value;
+                GAME_CONFIG.window[item] = isNaN(parseInt(jvalue)) ? jvalue : parseInt(jvalue);
+            }
+        }
+        piece.gameStart("game");
+        alert("保存成功");
+        close();
+    }
+    function defaultConfig() {
+        GAME_CONFIG.window = {
+            width:400,
+            height:400,
+            line_color:"#2F4056", //线条颜色
+            line_width:1, // 棋子线条宽度px
+            box_height:20,  //棋子高度px
+            box_width:20,   //棋子宽度px
+            piece_white_color:"#FFFFFF",
+            piece_black_color:"#000000",
+        };
+        piece.gameStart("game");
+        alert("恢复默认成功");
+        close();
+    }
+    function close() {
+        document.getElementById("setting").style.display = "none";
+    }
+    function help() {
+        alert("\n" +
+            "\n" +
+            "游戏规则:" +
+            "\n" +
+            "\n" +
+            "*五颗棋子成连续五颗即胜利~" +
+            "\n" +
+            "\n" +
+            "关于禁手(禁手存在时):" +
+            "\n" +
+            "*因为五子棋先手是可以保证100%胜利的，为了限制先手(黑棋),添加了禁手规则,规则如下:" +
+            "\n" +
+            "\n" +
+            "1.两个或两个以上的活三(一定要活三才算);" +
+            "\n" +
+            "2.两个或两个以上的连四(活四,冲四,嵌五);" +
+            "\n" +
+            "3.长连(形成六个或六个以上的连续棋子);" +
+            "\n" +
+            "\n" +
+            "\n" +
+            "\n" +
+            "");
+    }
+</script>
+<script>
+   // piece.bannerWrite();
     //AI回调
     piece.aICallBack  = function () {
-        var $data = pieceAI.start(piece.$GAME_DATA_All);
-        console.log($data);
+        console.log("========================================================================");
+        var $data = pieceAI.start(piece.$GAME_DATA_All,GAME_CONFIG.game.TheUpperHand,GAME_CONFIG.game.rank,GAME_CONFIG.game.fiveInARow);
         piece.pieceClick($data.x,$data.y);
+        console.log("落子:   x:" + $data.x +"  y:" + $data.y + " score:" + $data.score);
+        console.log("========================================================================");
     }
+    //初始化配置
     piece.gameStart("game");
 </script>
 </html>

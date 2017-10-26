@@ -11,12 +11,12 @@
 var GAME_CONFIG = {
     //界面配置
     window:{
-        width:400,
-        height:400,
+        width:470,
+        height:470,
         line_color:"#2F4056", //线条颜色
         line_width:1, // 棋子线条宽度px
-        box_height:20,  //棋子高度px
-        box_width:20,   //棋子宽度px
+        box_height:30,  //棋子高度px
+        box_width:30,   //棋子宽度px
         piece_white_color:"#FFFFFF",
         piece_black_color:"#000000",
     },
@@ -25,7 +25,8 @@ var GAME_CONFIG = {
         $lineCount:0,
         $columnCount:0,
         $elementIdName:"",
-        rank:0,  //机器人等级
+        rank:2,  //机器人等级
+        fiveInARow:false, //禁手
     }
 };
 
@@ -53,6 +54,9 @@ piece.aICallBack = null;
  */
 piece.$GAME_DATA_All ;
 
+
+
+
 /**
  * 下棋的历史记录
  * @type {Array}
@@ -67,18 +71,18 @@ piece.$PieceHistory = [];
  */
 piece.gameStart = function ($elementIdName) {
     var element = document.getElementById($elementIdName);
+    element.innerHTML = "";
     var $lineCount = (GAME_CONFIG.window.width ) / (GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width);
     var $columnCount = (GAME_CONFIG.window.height) / (GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width);
     $lineCount = parseInt($lineCount);
     $columnCount = parseInt($columnCount);
-    element.style.width = (((GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width) * $lineCount) + 50)  + "px";
-    element.style.height = (((GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width) * $lineCount) + 50) +"px";
-    element.style.left = (50) + "px";
-    element.style.top = (50) + "px";
+    element.style.width = (((GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width) * $lineCount) + GAME_CONFIG.window.box_width)  + "px";
+    element.style.height = (((GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width) * $lineCount) + GAME_CONFIG.window.box_height) +"px";
+    element.style.left = (GAME_CONFIG.window.box_width )+ "px";
+    element.style.top = (GAME_CONFIG.window.box_height * 2)+ "px";
     GAME_CONFIG.game.$lineCount = $lineCount;
     GAME_CONFIG.game.$columnCount = $columnCount;
     GAME_CONFIG.game.$elementIdName = $elementIdName;
-    piece.bannerWrite();
 }
 
 
@@ -164,6 +168,8 @@ piece.pieceClickEven = function (dom) {
     piece.playChessFlag = setTimeout(piece.pieceClick(x,y),500);
 }
 
+piece.border = null;
+
 /**
  * 下棋核心
  * @param dom
@@ -180,13 +186,30 @@ piece.pieceClick = function(x,y) {
     var $value = piece.onTheOffensiveFlag? 1:2;
     piece.$GAME_DATA_All[x][y] = $value;
     piece.$PieceHistory.push({'x':x,'y':y,'value':piece.onTheOffensiveFlag == true});
+
+    if(piece.border != null){
+        piece.border.style.borderStyle  = "none";
+    }
+
     if(piece.onTheOffensiveFlag){
         dom.style.backgroundColor = GAME_CONFIG.window.piece_white_color;
+        dom.style.border = "1px solid red";
+
     }else{
         dom.style.backgroundColor = GAME_CONFIG.window.piece_black_color;
+        dom.style.border = "1px solid red";
     }
+    piece.border = dom;
+
+
+
     piece.isGameOver(x,y,$value);
     piece.onTheOffensiveFlag = !piece.onTheOffensiveFlag;
+
+    //AI对下
+    // setTimeout( function () {
+    //     piece.aICallBack();
+    // },100);
 
     //AI开始
     if (piece.aICallBack != null && piece.onTheOffensiveFlag==GAME_CONFIG.game.TheUpperHand){
@@ -201,6 +224,23 @@ piece.isGameOver = function (x,y,$value) {
     x = parseInt(x);
     y = parseInt(y);
     var tempArray = piece.$GAME_DATA_All;
+    if(common.isPeace(tempArray)){
+        piece.gameOver(x,y,null,"和棋！~~");
+        return;
+    }
+
+    //禁手判断  触发禁手即输 前提(禁手规则开启)
+    if(GAME_CONFIG.game.fiveInARow && (!piece.onTheOffensiveFlag)){
+        var parseArray = common.parseArray(x,y,tempArray);
+        var $data = common.isFiveInARow(parseArray); //禁手触发判断
+        if($data.flag == true){
+            piece.gameOver(x,y,[{x:x,y:y}],$data.returnStr);
+            return;
+        }
+    }
+
+
+    //===============5子连珠判断
     var $x_min = (x-5<0 ? 0 :(x - 5 ));
     var $x_max = (x+5 > tempArray.length ? tempArray.length : (x + 5));
 
@@ -301,12 +341,18 @@ piece.isGameOver = function (x,y,$value) {
  * @param y
  * @param array 五子连珠的数组
  */
-piece.gameOver=function (x , y , array) {
+piece.gameOver=function (x , y , array,str) {
     piece.gameOverFlag = true;
     var color = piece.onTheOffensiveFlag ? GAME_CONFIG.window.piece_white_color :GAME_CONFIG.window.piece_black_color;
-    piece.pieceTwinkle(array,true,color);
-    var str = piece.onTheOffensiveFlag ? "白棋" : "黑棋";
-    alert(str + "赢了");
+    if(array != null)
+        piece.pieceTwinkle(array,true,color);
+    if(str == null){
+        var user = GAME_CONFIG.game.TheUpperHand == piece.onTheOffensiveFlag ? "电脑" : "您";
+        str = piece.onTheOffensiveFlag ? "白棋"  : "黑棋";
+        str = str + "("+user + ")赢了";
+    }
+    common.log(str);
+    alert(str);
 }
 
 /**
@@ -379,12 +425,6 @@ piece.gameInterface = function (element) {
     element.innerHTML = $html;
 }
 
-/**
- *  设置页面
- */
-piece.setting = function () {
-
-}
 
 /**
  * banner 推广 输出
