@@ -123,7 +123,7 @@ pieceAI.lowerRankParse= function () {
             return  maxAI;
         };
         //对手棋对我没有威胁
-        var flag = pieceAI.isAttack(_aiData,_duishouData,aiRankScore,duishouRankScore);
+        var flag = pieceAI.isAttack(aiRankScore,duishouRankScore);
         var $data = optimizationAI(flag);
         return $data;
     };
@@ -166,11 +166,14 @@ pieceAI.seniorRankParse = function () {
     var aiRankScore =  pieceAI.maxPieceArrRankScore(AiArr);
     var duishouRankScore = pieceAI.maxPieceArrRankScore(duishouArr);
     //得到可下位置
+    var attackflag = pieceAI.isAttack(aiRankScore,duishouRankScore);
+    var dataArr = pieceAI.optimization(attackflag?aiRankScore:duishouRankScore,attackflag?AiArr:duishouArr);
+
     //是否需要直接进攻
-    var dataArr = pieceAI.optimization(aiRankScore,AiArr).concat(pieceAI.optimization(duishouRankScore,duishouArr)).sort(function (a,b) {
-        return a.score - b.score;
-    });
-    var maxScore = Number.NEGATIVE_INFINITY,maxScoreNode = null;
+    //var dataArr = pieceAI.optimization(aiRankScore,AiArr).concat(pieceAI.optimization(duishouRankScore,duishouArr)).sort(function (a,b) {
+     //   return a.score - b.score;
+    //});
+    var maxScore = Number.NEGATIVE_INFINITY,maxScoreNode = [];
 
     console.log("准备搜索节点个数:" + dataArr.length);
     var depth = 6 ;
@@ -184,17 +187,21 @@ pieceAI.seniorRankParse = function () {
         $data.parentNode = null; //父节点
         //得到全局分
         var score = pieceAI.nextTree($data,pieceDataArr,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY,depth);
+        if(score == maxScore){
+            maxScoreNode.push($data);
+        }
         if(score > maxScore ){
             maxScore = score;
-            maxScoreNode = $data;
+            maxScoreNode = [$data];
         }
         console.log("i:" + i + "   nextTreeCount:" + nextTreeCount + "          nextTreeCut:" + nextTreeCut + "   data:x" + $data.x + " y:"+$data.y+" score:" + $data.score + "  score:" + score);
     }
     //下棋
-    if (maxScoreNode == null){
+    if (maxScoreNode.length == 0){
         return pieceAI.lowerRankParse(pieceAI.aIPieceFlag ,2);
     }
-    return maxScoreNode;
+    var random = Math.floor(Math.random()*((maxScoreNode.length-1)-0+1)+0);
+    return maxScoreNode[random];
 }
 
 /**
@@ -227,6 +234,7 @@ pieceAI.optimization = function (rankScore,pieceArr) {
             if(pieceData.score >= rankScore){
                 dataArr.push(pieceData);
             }else {
+                //取五个
                 break;
             }
         }
@@ -242,16 +250,16 @@ pieceAI.optimization = function (rankScore,pieceArr) {
  * @param duishouRankScore
  * @returns {boolean}  true 进攻  false 防守
  */
-pieceAI.isAttack = function (aiData,duishouData,aiRankScore,duishouRankScore) {
+pieceAI.isAttack = function (aiRankScore,duishouRankScore) {
 
-    if(aiData.score >0 && duishouData.score < (5*Math.pow(10,8))){
+    if(aiRankScore >0 && duishouRankScore < (5*Math.pow(10,8))){
        return true;
     }else{
-        if(aiData.score == 0){
+        if(aiRankScore == 0){
             return false;
         }
         //有威胁  看对手的评分等级谁大
-        if(aiData.score  >= Math.pow(10,10) || aiRankScore >= duishouRankScore ){ //我先成5 或者 我的分大于对手的分
+        if(aiRankScore  == Math.pow(10,10) || aiRankScore >= duishouRankScore ){ //我先成5 或者 我的分大于对手的分
             return true;
         }else{
             //对手等级分比你大
@@ -265,7 +273,7 @@ pieceAI.isAttack = function (aiData,duishouData,aiRankScore,duishouRankScore) {
                 ) && duishouRankScore == 5*Math.pow(10,8)){ //你双火3
                 return true;
             }
-            if(Math.abs(aiData.score - duishouData.score)< (200000000) && Math.abs(aiData.score -duishouData.score) > (100000000)  ){
+            if(Math.abs(aiRankScore- duishouRankScore)< (200000000) && Math.abs(aiRankScore - duishouRankScore) > (100000000)  ){
                 return true;
             }else{
                 return false;
@@ -290,11 +298,8 @@ pieceAI.nextTree = function (node,pieceDataArr,a,b,depth) {
     nextTreeCount++;
     node.nextArr = [];
     var bestValue, curValue;
-    if(Math.abs(node.score) >= Math.pow(10,10)){ //无法防的棋
-        return  pieceAI.pieceDepthNodeScoreSum(node);
-    }
-    if(0 == depth){
-        return pieceAI.pieceDepthNodeScoreSum(node) ; // 全局打分
+    if(Math.abs(node.score) >= Math.pow(10,10) || 0 == depth){
+        return node.score ; // 全局打分
     }
     var blockScoreDataArr = [],whriteScoreDataArr = [];
     pieceDataArr[node.x][node.y] = (node.pieceFlag == true ? 1:2);//下棋
@@ -304,18 +309,23 @@ pieceAI.nextTree = function (node,pieceDataArr,a,b,depth) {
             if(pieceDataArr[x][y] == 0){
                 var tempArray = common.parseArray(x,y,pieceDataArr);
                 var $data = pieceAI.positionScore(tempArray);
-                blockScoreDataArr.push({x:x,y:y,score:$data.blockScoreSum});
-                whriteScoreDataArr.push({x:x,y:y,score:$data.whriteScoreSum});
+                if ($data.blockScoreSum > 0)
+                    blockScoreDataArr.push({x:x,y:y,score:$data.blockScoreSum});
+                if($data.whriteScoreSum > 0)
+                    whriteScoreDataArr.push({x:x,y:y,score:$data.whriteScoreSum});
             }
         }
     }
-    var blockRankScore =  pieceAI.maxPieceArrRankScore(blockScoreDataArr);
-    var whriteRankScore = pieceAI.maxPieceArrRankScore(whriteScoreDataArr);
 
+    //判断对手棋
+    var duishouArr = !node.pieceFlag  ? blockScoreDataArr  :whriteScoreDataArr;
+    var aiArr = !node.pieceFlag ? whriteScoreDataArr :blockScoreDataArr;
 
-    //得到可下位置
-    //是否需要直接进攻
-    var dataArr = pieceAI.optimization(blockRankScore,blockScoreDataArr).concat(pieceAI.optimization(whriteRankScore,whriteScoreDataArr)).sort(function (a,b) {
+    var duishouRankScore =  pieceAI.maxPieceArrRankScore(duishouArr);
+    var aiRankScore = pieceAI.maxPieceArrRankScore(aiArr);
+    
+    var attackflag = pieceAI.isAttack(aiRankScore,duishouRankScore);
+    var dataArr = pieceAI.optimization(attackflag?aiRankScore:duishouRankScore,attackflag?aiArr:duishouArr).sort(function (a,b) {
         return a.score - b.score;
     });
 
@@ -323,7 +333,7 @@ pieceAI.nextTree = function (node,pieceDataArr,a,b,depth) {
     for(var i=3;i>=depth;i--){
         head += head;
     }
-    //console.log(head + " depth:" + (3-depth) + "   搜索节点个数:" + dataArr.length + "--" + JSON.stringify(dataArr));
+    console.log(head + " depth:" + (3-depth) + "   搜索节点个数:" + dataArr.length + "--" + JSON.stringify(dataArr));
 
     if(node.maxFlag == false){
         for(var i=0;i<dataArr.length;i++){
@@ -365,75 +375,6 @@ pieceAI.nextTree = function (node,pieceDataArr,a,b,depth) {
     }
     pieceDataArr[node.x][node.y] = 0; //恢复
     return bestValue;
-
-
-
-
-
-
-
-
-
-    // //ai
-    // if(node.maxFlag == false){
-    //     for(var x = 0;x < pieceDataArr.length ; x++){
-    //         for(var y = 0;y<pieceDataArr[x].length ; y++){
-    //             if(pieceDataArr[x][y] == 0){
-    //                 if (a >= b){
-    //                     nextTreeCut ++;
-    //                     return a;
-    //                 }
-    //                 pieceDataArr[node.x][node.y] = (node.pieceFlag == true ? 1:2);//下棋
-    //                 var tempArray = common.parseArray(x,y,pieceDataArr);
-    //                 var $data = pieceAI.positionToColorScore(tempArray,(!node.pieceFlag))
-    //                 $data.maxFlag = (!node.maxFlag);
-    //                 $data.x = x;
-    //                 $data.y = y;
-    //                 $data.parentNode = node;
-    //                 $data.pieceFlag = (!node.pieceFlag);
-    //                 curValue = pieceAI.nextTree($data,pieceDataArr,a,b,depth-1);
-    //                 pieceDataArr[node.x][node.y] = 0; //恢复
-    //                 if (curValue > a) {
-    //                     a = curValue;
-    //                 }
-    //                 node.nextArr.push($data);
-    //             }
-    //         }
-    //     }
-    //     bestValue =  a;
-    // }else{
-    //     //玩家
-    //     for(var x = 0;x < pieceDataArr.length ; x++){
-    //         for(var y = 0;y<pieceDataArr[x].length ; y++){
-    //             if(pieceDataArr[x][y] == 0){
-    //                 if(a >= b){
-    //                     nextTreeCut++;
-    //                     return b;
-    //                 }
-    //                 pieceDataArr[node.x][node.y] = (node.pieceFlag == true ? 1:2);
-    //                 var tempArray = common.parseArray(x,y,pieceDataArr);
-    //                 var $data = pieceAI.positionToColorScore(tempArray,(!node.pieceFlag))
-    //                 $data.maxFlag = (!node.maxFlag);
-    //                 $data.x = x;
-    //                 $data.y = y;
-    //                 $data.parentNode = node;
-    //                 $data.pieceFlag = (!node.pieceFlag);
-    //                 $data.score = -$data.score;
-    //
-    //
-    //
-    //                 curValue = pieceAI.nextTree($data,pieceDataArr,a,b,depth-1);
-    //                 pieceDataArr[node.x][node.y] = 0;
-    //                 if (curValue < b) {
-    //                     b = curValue; //子节点的最小值记录到beta中
-    //                 }
-    //                 node.nextArr.push($data);
-    //             }
-    //         }
-    //     }
-    //     bestValue =  b;
-    // }
-    // return bestValue;
 }
 
 

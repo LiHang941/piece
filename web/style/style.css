@@ -10,6 +10,8 @@
     position: relative;
     border-radius: 50%;
     z-index: 3;
+    text-align: center;
+    font-size: 8px;
 }
 .piece-click {
     opacity: 1;
@@ -63,7 +65,7 @@ body{
 }
 .muens {
     position: absolute;
-    right: 0px;
+    left: 0px;
     top:200px;
     width: 200px;
     height: auto;

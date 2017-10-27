@@ -98,6 +98,7 @@ piece.gameRestart = function (theUpperHandFlag) {
     piece.$PieceHistory = [];
     piece.gameOverFlag = false;
     piece.onTheOffensiveFlag = false;
+    piece.count = 0;
     var xArray = new Array(GAME_CONFIG.game.$lineCount);
     for(var x=0;x<GAME_CONFIG.game.$lineCount;x++){
         xArray[x]=new Array(GAME_CONFIG.game.$columnCount);
@@ -120,6 +121,7 @@ piece.gameRestart = function (theUpperHandFlag) {
 piece.withdraw = function () {
     if(piece.$PieceHistory.length > 1){
         var data = piece.$PieceHistory.pop();
+        piece.count--;
         //是电脑下的
         if(data.value == GAME_CONFIG.game.TheUpperHand){
             piece.$GAME_DATA_All[data.x][data.y] = 0;
@@ -128,6 +130,7 @@ piece.withdraw = function () {
             data = piece.$PieceHistory.pop();
             piece.$GAME_DATA_All[data.x][data.y] = 0;
             document.getElementById("piece_x_" + data.x + "_y_" + data.y).setAttribute("class","piece sun");
+            piece.count--;
         }
         //判断玩家是哪种棋子
         piece.gameOverFlag = false;
@@ -169,7 +172,7 @@ piece.pieceClickEven = function (dom) {
 }
 
 piece.border = null;
-
+piece.count = 0;
 /**
  * 下棋核心
  * @param dom
@@ -190,14 +193,16 @@ piece.pieceClick = function(x,y) {
     if(piece.border != null){
         piece.border.style.borderStyle  = "none";
     }
+    dom.innerHTML = (++piece.count );
 
     if(piece.onTheOffensiveFlag){
         dom.style.backgroundColor = GAME_CONFIG.window.piece_white_color;
         dom.style.border = "1px solid red";
-
+        dom.style.color = GAME_CONFIG.window.piece_black_color;
     }else{
         dom.style.backgroundColor = GAME_CONFIG.window.piece_black_color;
         dom.style.border = "1px solid red";
+        dom.style.color = GAME_CONFIG.window.piece_white_color;
     }
     piece.border = dom;
 
@@ -413,7 +418,9 @@ piece.gameInterface = function (element) {
             var $qiziStyle = "left:-" + (GAME_CONFIG.window.box_width + GAME_CONFIG.window.line_width) /2 +"px;" +
                 " top:-"+ (GAME_CONFIG.window.box_height + GAME_CONFIG.window.line_width) /2+"px;" +
                 " width: "+(GAME_CONFIG.window.box_width)+"px;" +
-                " height: "+(GAME_CONFIG.window.box_height)+"px;";
+                " height: "+(GAME_CONFIG.window.box_height)+"px;"+
+                " line-height: "+(GAME_CONFIG.window.box_height)+"px;"
+                ;
             $html = $html +
                 '<div class="horizontal" id="horizontal_x_'+ x +'_y_'+y+'" style="'+style+'">' +
                 '<div id="piece_x_'+ x +'_y_'+y+'" class="piece sun" style="'+$qiziStyle+'" x="'+x+'" y="'+y+'" onclick="piece.pieceClickEven(this)">' +
