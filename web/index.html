@@ -7,80 +7,80 @@
 <!--游戏css-->
 <link href="style/style.css" rel="stylesheet">
 <body>
-    <h1 class="head">五子棋</h1>
+<h1 class="head">五子棋</h1>
+<hr/>
+<div class="centent">
+    <div class="gameBackground">
+        <div id="game" class="game">
+        </div>
+    </div>
+</div>
+
+<!--右侧菜单栏-->
+<div class="muens">
+    <div style="text-align: center;color: #2F4056;font-size: 20px;margin-top: 15px;font-weight:bold">游戏菜单</div>
+    <ul>
+        <li style="background-color: #009688" onclick="piece.gameRestart(true)">玩家先行</li>
+        <li style="background-color: #009688" onclick="piece.gameRestart(false)">电脑先行</li>
+        <li style="background-color: #FF5722" onclick="piece.withdraw()">撤回</li>
+        <li style="background-color: #01AAED" onclick="help()">帮助</li>
+        <li style="background-color: #FFFFFF;border: 1px solid #e2e2e2;color: #393D49" onclick="setting()">配置</li>
+    </ul>
+    <div style="text-align: center;color: #393D49;font-size: 20px;margin-top: 15px;font-weight:bold">游戏等级</div>
+    <div style="width: 180px;margin: 0 auto;">
+        <select name="rank" onchange="selectFn(this,true)">
+            <option value="2">噩梦(向后推7步)</option>
+            <option value="1">困难(偏进攻)</option>
+            <option value="0">简单(偏防守)</option>
+        </select>
+    </div>
+    <div style="text-align: center;color: #2F4056;font-size: 20px;margin-top: 15px;font-weight:bold">有无禁手</div>
+    <div style="width: 180px;margin: 0 auto;">
+        <select name="fiveInARow" onchange="selectFn(this,false)">
+            <option value="1">有</option>
+            <option value="0">无</option>
+        </select>
+    </div>
+</div>
+
+<div class="setting" id="setting">
+    <h1 class="head" style="color: #393D49">游戏配置</h1>
     <hr/>
-    <div class="centent">
-        <div class="gameBackground">
-            <div id="game" class="game">
-            </div>
-        </div>
+    <table>
+        <tr>
+            <td style="width: 150px"><b>颜色</b><small>(颜色代码)</small></td>
+            <td style="width: 100px">白棋颜色</td>
+            <td style="width: 100px;"><input name="piece_white_color" value=""/></td>
+            <td style="width: 100px">黑棋颜色</td>
+            <td style="width: 100px"><input name="piece_black_color" value=""/></td>
+            <td style="width: 100px">线条颜色</td>
+            <td style="width: 100px"><input name="line_color" value=""/></td>
+        </tr>
+        <tr>
+            <td><b>长宽</b><small>(单位px)</small></td>
+            <td>棋子高度</td>
+            <td><input name="box_height" value=""/></td>
+            <td>棋子宽度</td>
+            <td><input name="box_width" value=""/></td>
+            <td>线条宽度</td>
+            <td><input name="line_width" value=""/></td>
+        </tr>
+    </table>
+    <div style="margin: 0 auto;width: 500px;">
+        <a href="javascript:saveConfig();">保存</a>
+        <a href="javascript:close();" style="background-color:#FF5722;">关闭</a>
+        <a href="javascript:defaultConfig();" style="background-color:#01AAED;">恢复默认</a>
     </div>
+</div>
+<div class="state">
+    <p id="stateLog">欢迎使用五子棋游戏</p>
+</div>
+<hr/>
 
-    <!--右侧菜单栏-->
-    <div class="muens">
-        <div style="text-align: center;color: #2F4056;font-size: 20px;margin-top: 15px;font-weight:bold">游戏菜单</div>
-        <ul>
-            <li style="background-color: #009688" onclick="piece.gameRestart(true)">玩家先行</li>
-            <li style="background-color: #009688" onclick="piece.gameRestart(false)">电脑先行</li>
-            <li style="background-color: #FF5722" onclick="piece.withdraw()">撤回</li>
-            <li style="background-color: #01AAED" onclick="help()">帮助</li>
-            <li style="background-color: #FFFFFF;border: 1px solid #e2e2e2;color: #393D49" onclick="setting()">配置</li>
-        </ul>
-        <div style="text-align: center;color: #393D49;font-size: 20px;margin-top: 15px;font-weight:bold">游戏等级</div>
-        <div style="width: 180px;margin: 0 auto;">
-            <select name="rank" onchange="selectFn(this,true)">
-                <option value="2" >噩梦(向后推7步)</option>
-                <option value="1" >困难(偏进攻)</option>
-                <option value="0" >简单(偏防守)</option>
-            </select>
-        </div>
-        <div style="text-align: center;color: #2F4056;font-size: 20px;margin-top: 15px;font-weight:bold">有无禁手</div>
-        <div style="width: 180px;margin: 0 auto;">
-            <select name="fiveInARow" onchange="selectFn(this,false)">
-                <option value="1" >有</option>
-                <option value="0" >无</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="setting" id="setting">
-        <h1 class="head" style="color: #393D49">游戏配置</h1>
-        <hr/>
-        <table>
-            <tr>
-                <td style="width: 150px"><b>颜色</b><small>(颜色代码)</small></td>
-                <td  style="width: 100px">白棋颜色 </td>
-                <td  style="width: 100px;"><input name="piece_white_color"  value=""/></td>
-                <td  style="width: 100px">黑棋颜色 </td>
-                <td  style="width: 100px"><input name="piece_black_color"  value=""/></td>
-                <td  style="width: 100px">线条颜色 </td>
-                <td  style="width: 100px"><input name="line_color"  value=""/></td>
-            </tr>
-            <tr>
-                <td><b>长宽</b><small>(单位px)</small></td>
-                <td>棋子高度 </td>
-                <td><input name="box_height" value=""/></td>
-                <td>棋子宽度 </td>
-                <td><input name="box_width" value=""/></td>
-                <td>线条宽度 </td>
-                <td><input name="line_width" value=""/></td>
-            </tr>
-        </table>
-        <div style="margin: 0 auto;width: 500px;">
-            <a href="javascript:saveConfig();" >保存</a>
-            <a href="javascript:close();" style="background-color:#FF5722;">关闭</a>
-            <a href="javascript:defaultConfig();" style="background-color:#01AAED;">恢复默认</a>
-        </div>
-    </div>
-    <div class="state">
-        <p id="stateLog">欢迎使用五子棋游戏</p>
-    </div>
-    <hr/>
-
-    <div class="bottom">
-        <P>源码:<a href="https://github.com/LiHang941/piece">github</a></P>
-        <P>@2017-10-23</P>
-    </div>
+<div class="bottom">
+    <P>源码:<a href="https://github.com/LiHang941/piece">Github</a></P>
+    <P><img src="./upyun_logos/logo.png" height="80px" alt="又拍云"></P>
+</div>
 
 </body>
 <script src="js/core.js"></script>
@@ -88,26 +88,29 @@
 <script src="js/common.js"></script>
 <script>
     document.getElementsByName("rank")[0].value = GAME_CONFIG.game.rank;
-    document.getElementsByName("fiveInARow")[0].value = GAME_CONFIG.game.fiveInARow ? 1: 0;
-    function selectFn(dom,flag) {
-        if(flag == true){
+    document.getElementsByName("fiveInARow")[0].value = GAME_CONFIG.game.fiveInARow ? 1 : 0;
+
+    function selectFn(dom, flag) {
+        if (flag == true) {
             GAME_CONFIG.game.rank = parseInt(dom.value);
-        }else{
-            GAME_CONFIG.game.fiveInARow = (dom.value == 1 ? true: false);
+        } else {
+            GAME_CONFIG.game.fiveInARow = (dom.value == 1 ? true : false);
         }
     }
+
     function setting() {
-        for(var item in GAME_CONFIG.window){
-            if(item != "width" && item != "height"){
-                var jValue=GAME_CONFIG.window[item];//key所对应的value
+        for (var item in GAME_CONFIG.window) {
+            if (item != "width" && item != "height") {
+                var jValue = GAME_CONFIG.window[item];//key所对应的value
                 document.getElementsByName(item)[0].value = jValue;
             }
         }
         document.getElementById("setting").style.display = "block";
     }
+
     function saveConfig() {
-        for(var item in GAME_CONFIG.window){
-            if(item != "width" && item != "height"){
+        for (var item in GAME_CONFIG.window) {
+            if (item != "width" && item != "height") {
                 var jvalue = document.getElementsByName(item)[0].value;
                 GAME_CONFIG.window[item] = isNaN(parseInt(jvalue)) ? jvalue : parseInt(jvalue);
             }
@@ -116,24 +119,27 @@
         alert("保存成功");
         close();
     }
+
     function defaultConfig() {
         GAME_CONFIG.window = {
-            width:400,
-            height:400,
-            line_color:"#2F4056", //线条颜色
-            line_width:1, // 棋子线条宽度px
-            box_height:20,  //棋子高度px
-            box_width:20,   //棋子宽度px
-            piece_white_color:"#FFFFFF",
-            piece_black_color:"#000000",
+            width: 400,
+            height: 400,
+            line_color: "#2F4056", //线条颜色
+            line_width: 1, // 棋子线条宽度px
+            box_height: 20,  //棋子高度px
+            box_width: 20,   //棋子宽度px
+            piece_white_color: "#FFFFFF",
+            piece_black_color: "#000000",
         };
         piece.gameStart("game");
         alert("恢复默认成功");
         close();
     }
+
     function close() {
         document.getElementById("setting").style.display = "none";
     }
+
     function help() {
         alert("\n" +
             "\n" +
@@ -161,13 +167,13 @@
     }
 </script>
 <script>
-   // piece.bannerWrite();
+    // piece.bannerWrite();
     //AI回调
-    piece.aICallBack  = function () {
+    piece.aICallBack = function () {
         console.log("========================================================================");
-        var $data = pieceAI.start(piece.$GAME_DATA_All,GAME_CONFIG.game.TheUpperHand,GAME_CONFIG.game.rank,GAME_CONFIG.game.fiveInARow);
-        piece.pieceClick($data.x,$data.y);
-        console.log("落子:   x:" + $data.x +"  y:" + $data.y + " score:" + $data.score);
+        var $data = pieceAI.start(piece.$GAME_DATA_All, GAME_CONFIG.game.TheUpperHand, GAME_CONFIG.game.rank, GAME_CONFIG.game.fiveInARow);
+        piece.pieceClick($data.x, $data.y);
+        console.log("落子:   x:" + $data.x + "  y:" + $data.y + " score:" + $data.score);
         console.log("========================================================================");
     }
     //初始化配置
