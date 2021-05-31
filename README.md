@@ -1,5 +1,5 @@
 # js五子棋实现（包括AI）
-## [示例地址](https://piece.lihang941.club/)
+## [示例地址](https://lihang941.github.io/piece/web/index.html)
 
 ### 五子棋开发流程
  1. 界面实现  
